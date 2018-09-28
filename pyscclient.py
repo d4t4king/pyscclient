@@ -247,7 +247,8 @@ class Alert(BasicAPIObject):
 
 class Asset(BasicAPIObject):
 	# represents an Asset in object form
-	def __init__(self, **kwargs):
+	def __init__(self):
+		super(BasicAPIObject, self).__init__()
 		self.status = ''
 		self.creator = ''
 		self.owner = ''
@@ -265,20 +266,21 @@ class Asset(BasicAPIObject):
 		self.ipCount = 0
 		self.assetDataFields = []		# This is likely an array or hash.
 		self.viewableIPs = []			# Probably an array; may cause slow processing, i.e. a lot of data.
-
 		# should probably set filter parameters
 		# usable, managable, excludeAllDefined, excludeWatchlists
-
-		return self
 
 	@staticmethod
 	def load(sc, id):
 		# load the Asset from the console in object form
-		print("This class method is not yet implemented.")
-		pass
+		resp = sc.get('asset', params={'id':['id']})
+		rb = resp.json()['response']
+		asset = Asset()
+		asset.__dict__.update(rb)
+		return asset
 
 class AuditFile(BasicAPIObject):
 	def __init__(self):
+		super(BasicAPIObject, self).__init__()
 		self.type = ''
 		self.status = ''
 		self.groups = list()
@@ -326,9 +328,7 @@ class Credential(BasicAPIObject):
 
 class CurrentUser(BasicAPIObject):
 	def __init__(self, _id):
-		self.id = _id
-		self.name = ''
-		self.description = ''
+		super(BasicAPIObject, self).__init__()
 		self.type = ''
 		self.creator = ''
 		self.target = ''
@@ -350,9 +350,7 @@ class CurrentUser(BasicAPIObject):
 
 class Group(BasicAPIObject):
 	def __init__(self, _id):
-		self.id = _id
-		self.name = ''
-		self.description = ''
+		super(BasicAPIObject, self).__init__()
 		self.createdTime = 0
 		self.modifiedTime = 0
 		self.lces = list()								# list of LCEs
@@ -373,7 +371,7 @@ class Group(BasicAPIObject):
 		print('FYI')
 		pass
 
-class IPInfo(BasicAPIObject):
+class IPInfo(object):
 	def __init__(self, _ip):
 		self.ip = _ip
 		self.repositoryID = 0
@@ -438,19 +436,19 @@ class Organization(BasicAPIObject):
 
 	def __repr__(self):
 		mystr = """
-id=%s, name=%s, description=%s, email=%s, address=%s, city=%s, 
-state=%s, country=%s, phone=%s, fax=%s, ipInfoLinks=%s, 
-zoneSelection=%s, restrictedIPs=%s, vulnScoreLow=%s
-vulnScoreMedium=%s, vulnScoreHigh=%s, vulnScoreCritical=%s
-createdTime=%s, modifiedTime=%s, userCount=%s, lces=%s, 
-repositories=%s, zones=%s, nessusManagers=%s, pubSites=%s, 
-ldaps=%s""" % (self.id, self.name, self.description, \
-self.email, self.address, self.city, self.state, self.country, \
-self.phone, self.fax, self.ipInfoLinks, self.zoneSelection, \
-self.restrictedIPs, self.vulnScoreLow, self.vulnScoreMedium, \
-self.vulnScoreHigh, self.vulnScoreCritical, self.createdTime, \
-self.modifiedTime, self.userCount, self.lces, self.repositories, \
-self.zones, self.nessusManagers, self.pubSites, self.ldaps)
+	id=%s, name=%s, description=%s, email=%s, address=%s, city=%s,
+	state=%s, country=%s, phone=%s, fax=%s, ipInfoLinks=%s,
+	zoneSelection=%s, restrictedIPs=%s, vulnScoreLow=%s
+	vulnScoreMedium=%s, vulnScoreHigh=%s, vulnScoreCritical=%s
+	createdTime=%s, modifiedTime=%s, userCount=%s, lces=%s,
+	repositories=%s, zones=%s, nessusManagers=%s, pubSites=%s,
+	ldaps=%s""" % (self.id, self.name, self.description, \
+	self.email, self.address, self.city, self.state, self.country, \
+	self.phone, self.fax, self.ipInfoLinks, self.zoneSelection, \
+	self.restrictedIPs, self.vulnScoreLow, self.vulnScoreMedium, \
+	self.vulnScoreHigh, self.vulnScoreCritical, self.createdTime, \
+	self.modifiedTime, self.userCount, self.lces, self.repositories, \
+	self.zones, self.nessusManagers, self.pubSites, self.ldaps)
 		return mystr
 
 	@staticmethod
@@ -463,10 +461,8 @@ self.zones, self.nessusManagers, self.pubSites, self.ldaps)
 		return org
 
 class Plugin(BasicAPIObject):
-	def __init__(self, _id, _name=None):
-		self.id = _id
-		self.name = _name
-		self.description = ''
+	def __init__(self):
+		super(BasicAPIObject, self).__init__()
 		self.family = ''			# this should be a PluginFamily object
 		self.type = ''
 		self.copyright = ''
@@ -504,8 +500,8 @@ class Plugin(BasicAPIObject):
 
 	def __repr__(self):
 		my_str = "id:%s; name:%s; familyName:%s; type:%s; \
-riskFactor:%s; baseScore:%s; pluginPubDate:%s; \
-pluginModDate:%s; vulnPubDate:%s; modifiedTime:%s;" % (
+	riskFactor:%s; baseScore:%s; pluginPubDate:%s; \
+	pluginModDate:%s; vulnPubDate:%s; modifiedTime:%s;" % (
 			self.id, self.name, self.family.name, self.type, \
 			self.riskFactor, self.baseScore, \
 			time.strftime("%x %X", time.localtime(float(self.pluginPubDate))), \
@@ -518,54 +514,9 @@ pluginModDate:%s; vulnPubDate:%s; modifiedTime:%s;" % (
 	def load(sc, _id):
 		pp = pprint.PrettyPrinter(indent=4)
 		response = sc.get('plugin', params={'id': _id})
-		p = Plugin(_id, response.json()['response']['name'])
-		p.description = response.json()['response']['description']
-		pfam = PluginFamily.load(sc, response.json()['response']['family']['id'])
-		p.family = pfam
-		p.type = response.json()['response']['type']
-		p.copyright = response.json()['response']['copyright']
-		p.version = response.json()['response']['version']
-		p.sourceFile = response.json()['response']['sourceFile']
-		p.source = response.json()['response']['source']
-		p.dependencies = response.json()['response']['dependencies']
-		p.requiredPorts = response.json()['response']['requiredPorts']
-		p.requiredUDPPorts = response.json()['response']['requiredUDPPorts']
-		p.cpe = response.json()['response']['cpe']
-		if response.json()['response']['srcPort'] is not None:
-			p.srcPort = int(response.json()['response']['srcPort'])
-		if response.json()['response']['dstPort'] is not None:
-			p.dstPort = int(response.json()['response']['dstPort'])
-		p.protocol = response.json()['response']['protocol']
-		p.riskFactor = response.json()['response']['riskFactor']
-		p.solution = response.json()['response']['solution']
-		p.seeAlso = response.json()['response']['seeAlso']
-		p.synopsis = response.json()['response']['synopsis']
-		p.checkType = response.json()['response']['checkType']
-		p.exploitEase = response.json()['response']['exploitEase']
-		p.exploitAvailable = response.json()['response']['exploitAvailable']
-		p.exploitFrameworks = response.json()['response']['exploitFrameworks']
-		p.cvssVector = response.json()['response']['cvssVector']
-		p.cvssVectorBF = response.json()['response']['cvssVectorBF']
-		if response.json()['response']['baseScore'] is not None:
-			p.baseScore = float(response.json()['response']['baseScore'])
-		if response.json()['response']['temporalScore'] is not None:
-			p.temporalScore = float(response.json()['response']['temporalScore'])
-		p.stigSeverity = response.json()['response']['stigSeverity']
-		if response.json()['response']['pluginPubDate'] is not None:
-			p.pluginPubDate = int(response.json()['response']['pluginPubDate'])
-		if response.json()['response']['pluginModDate'] is not None:
-			p.pluginModDate = int(response.json()['response']['pluginModDate'])
-		if response.json()['response']['patchPubDate'] is not None:
-			p.patchPubDate = int(response.json()['response']['patchPubDate'])
-		if response.json()['response']['patchModDate'] is not None:
-			p.patchModDate = int(response.json()['response']['patchModDate'])
-		if response.json()['response']['vulnPubDate'] is not None:
-			p.vulnPubDate = int(response.json()['response']['vulnPubDate'])
-		if response.json()['response']['modifiedTime'] is not None:
-			p.modifiedTime = int(response.json()['response']['modifiedTime'])
-		p.md5 = response.json()['response']['md5']
-		for x in response.json()['response']['xrefs']:
-			p.xrefs.append(x)
+		rb = response.json()['response']
+		p = Plugin()
+		p.__dict__.update(rb)
 		return p
 
 class PluginFamily(BasicAPIObject):
@@ -594,9 +545,7 @@ class PluginFamily(BasicAPIObject):
 
 class Query(BasicAPIObject):
 	def __init__(self):
-		self.id = 0
-		self.name = ''
-		self.description = ''
+		super(BasicAPIObject, self).__init__()
 		self.creator = ''
 		self.owner = ''
 		self.ownerGroup = ''
@@ -628,10 +577,8 @@ class Repository(BasicAPIObject):
 	TYPE_REMOTE = 'Remote'
 	TYPE_OFFLINE = 'Offline'
 
-	def __init__(self, _id, _name, descr):
-		self.id = _id
-		self.name = _name
-		self.description = descr
+	def __init__(self):
+		super(BasicAPIObject, self).__init__()
 		self.type = ''
 		self.dataFormat = ''
 		self.vulnCount = 0
@@ -680,15 +627,11 @@ class Repository(BasicAPIObject):
 
 class Role(BasicAPIObject):
 	def __init__(self):
-		self.id = 0
-		self.name = ''
-		self.description = ''
+		super(BasicAPIObject, self).__init__()
 
 class Scan(BasicAPIObject):
-	def __init__(self, _id):
-		self.id = _id
-		self.name = ''
-		self.description = ''
+	def __init__(self):
+		super(BasicAPIObject, self).__init__()'
 		self.status = ''
 		self.ipList = list()
 		self.type = ''
@@ -719,13 +662,15 @@ class Scan(BasicAPIObject):
 	@staticmethod
 	def load(sc, _id):
 		pp = pprint.PrettyPrinter(indent=4)
-		response = sc.get('scan', params={'id': _id})
+		resp = sc.get('scan', params={'id': _id})
+		rb = resp.json()['response']
+		scan = Scan()
+		scan.__dict__.update(rb)
+		return scan
 
 class Scanner(BasicAPIObject):
-	def __init__(self, _id, _name, descr, **args):
-		self.id = _id
-		self.name = _name
-		self.description = descr
+	def __init__(self):
+		super(BasicAPIObject, self).__init__()
 		self.status = ''
 		# handle extra args in here somewhere
 		# instantiate some default values
@@ -758,8 +703,8 @@ class Scanner(BasicAPIObject):
 
 	def __repr__(self):
 		my_str = "id:%s; name:%s; status:%s; ip:%s; port:%s; \
-enabled:%s; agentCapable:%s; version:%s; webVersion:%s; \
-uptime:%s; loadedPluginSet:%s; createdTime:%s; zoneCount:%s;" % \
+	enabled:%s; agentCapable:%s; version:%s; webVersion:%s; \
+	uptime:%s; loadedPluginSet:%s; createdTime:%s; zoneCount:%s;" % \
 			(self.id, self.name, self.status, self.ip, self.port, \
 				self.enabled, \
 				self.agentCapable, self.version, self.webVersion, \
@@ -770,63 +715,11 @@ uptime:%s; loadedPluginSet:%s; createdTime:%s; zoneCount:%s;" % \
 	@staticmethod
 	def load(sc, scanner_id):
 		# load the scanner info from the console
-		#fields = ["id", "name", "description", "status", \
-		#	"ip", "port", "useProxy", "enabled", "verifyHost", \
-		#	"managePlugins", "authType", "cert", "username", \
-		#	"password", "agentCapable", "version"]
 		pp = pprint.PrettyPrinter(indent=4)
 		resp = sc.get('scanner', params={"id":scanner_id})
-		#pp.pprint(resp.json())
-		scn = Scanner(scanner_id, resp.json()['response']['name'], \
-						resp.json()['response']['description'])
-		scn.status = resp.json()['response']['status']
-		scn.ip = resp.json()['response']['ip']
-		if resp.json()['response']['port'] is not None:
-			scn.port = int(resp.json()['response']['port'])
-		scn.useProxy = resp.json()['response']['useProxy']
-		scn.enabled = resp.json()['response']['enabled']
-		scn.verifyHost = resp.json()['response']['verifyHost']
-		scn.managePlugins = resp.json()['response']['managePlugins']
-		scn.authType = resp.json()['response']['authType']
-		scn.cert = resp.json()['response']['cert']
-		scn.username = resp.json()['response']['username']
-		scn.password = resp.json()['response']['password']
-		scn.agentCapable = resp.json()['response']['agentCapable']
-		scn.version = resp.json()['response']['version']
-		scn.webVersion = resp.json()['response']['webVersion']
-		scn.admin = resp.json()['response']['admin']
-		scn.msp = resp.json()['response']['msp']
-		if resp.json()['response']['numScans'] is not None:
-			scn.numScans = int(resp.json()['response']['numScans'])
-		if resp.json()['response']['numHosts'] is not None:
-			scn.numHosts = int(resp.json()['response']['numHosts'])
-		if resp.json()['response']['numSessions'] is not None:
-			scn.numSessions = int(resp.json()['response']['numSessions'])
-		if resp.json()['response']['numTCPSessions'] is not None:
-			scn.numTCPSessions = int(resp.json()['response']['numTCPSessions'])
-		if resp.json()['response']['loadAvg'] is not None:
-			scn.loadAvg = float(resp.json()['response']['loadAvg'])
-		if resp.json()['response']['uptime'] is not None:
-			scn.uptime = int(resp.json()['response']['uptime'])
-		scn.pluginSet = resp.json()['response']['pluginSet']
-		scn.loadedPluginSet = resp.json()['response']['loadedPluginSet']
-		scn.serverUUID = resp.json()['response']['serverUUID']
-		if resp.json()['response']['createdTime'] is not None:
-			scn.createdTime = int(resp.json()['response']['createdTime'])
-		if resp.json()['response']['modifiedTime'] is not None:
-			scn.modifiedTime = int(resp.json()['response']['modifiedTime'])
-		for ele in resp.json()['response']['zones']:
-			#print("Element: {0}".format(ele))
-			#print("ID: {0}".format(ele['id']))
-			z = Zone.load(sc, ele['id'])
-			scn.zones.append(z)
-		#scn.zones = resp.json()['response']['zones']
-		scn.nessusManagerOrgs = resp.json()['response']['nessusManagerOrgs']
-		#print colored("=", "red") * 65
-		#print("ID: {0}, Name: {1}, Desc: {2}, Status: {3}".format( \
-		#	colored(scn.id, "green"), colored(scn.name, "green"), \
-		#	colored(scn.description, "green"), colored(scn.status, "green")))
-		#print colored("=", "red") * 65
+		rb = resp.json()['response']
+		scn = Scanner()
+		scn.__dict__.update(rb)
 		return scn
 
 	def save(self, sc):
@@ -841,11 +734,11 @@ class Utils(object):
 	@staticmethod
 	def get_cark_creds(config):
 		p = subprocess.Popen(["ssh", "root@{0}".format(config['aimproxy']), \
-"/opt/CARKaim/sdk/clipasswordsdk", "GetPassword", "-p", \
-"AppDescs.AppID={0}".format(config['appid']), "-p", \
-"\"Query=safe={0};Folder={1};Object={2}\"".format(
-config['safe'], config['folder'], config['objectname']), "-o", \
-"Password"], stdout=subprocess.PIPE)
+	"/opt/CARKaim/sdk/clipasswordsdk", "GetPassword", "-p", \
+	"AppDescs.AppID={0}".format(config['appid']), "-p", \
+	"\"Query=safe={0};Folder={1};Object={2}\"".format(
+	config['safe'], config['folder'], config['objectname']), "-o", \
+	"Password"], stdout=subprocess.PIPE)
 		tup_pass = p.communicate()
 		p = tup_pass[0].decode('ascii')
 		p = p.strip()
@@ -853,10 +746,8 @@ config['safe'], config['folder'], config['objectname']), "-o", \
 
 class Zone(BasicAPIObject):
 	# represents the scan Zone in SC in object form
-	def __init__(self, _id, _name, description):
-		self.id = _id
-		self.name = _name
-		self.description = description
+	def __init__(self):
+		super(BasicAPIObject, self).__init__()
 		self.ipList = []
 		self.createdTime = 0
 		self.modifiedTime = 0
@@ -867,8 +758,8 @@ class Zone(BasicAPIObject):
 
 	def __repr__(self):
 		my_str = "id:%s; name:%s; ipList:[%s]; createdTime:%s; \
-modifiedTime:%s; orgCount:%s; activeScanners:%s; \
-totalScanners:%s;" % (self.id, self.name, self.ipList, \
+	modifiedTime:%s; orgCount:%s; activeScanners:%s; \
+	totalScanners:%s;" % (self.id, self.name, self.ipList, \
 						self.createdTime, self.modifiedTime, \
 						len(self.organizations), self.activeScanners, \
 						self.totalScanners)
@@ -878,19 +769,8 @@ totalScanners:%s;" % (self.id, self.name, self.ipList, \
 	def load(sc, zone_id):
 		# loads an existing Zone from the console
 		response = sc.get('zone', params={'id': zone_id})
-		zn = Zone(zone_id, response.json()['response']['name'], \
-						response.json()['response']['description'])
-		zn.ipList = response.json()['response']['ipList']
-		if response.json()['response']['createdTime'] is not None:
-			zn.createdTime = int(response.json()['response']['createdTime'])
-		if response.json()['response']['modifiedTime'] is not None:
-			zn.modifiedTime = int(response.json()['response']['modifiedTime'])
-		zn.organizations = response.json()['response']['organizations']
-		if response.json()['response']['activeScanners'] is not None:
-			zn.activeScanners = int(response.json()['response']['activeScanners'])
-		if response.json()['response']['totalScanners'] is not None:
-			zn.totalScanners = int(response.json()['response']['totalScanners'])
-		zn.scanners = response.json()['response']['scanners']
+		rb = response.json()['response']
+		zn = Zone()
 		return zn
 
 	def save(self, sc):
