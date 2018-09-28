@@ -368,7 +368,7 @@ class Group(BasicAPIObject):
 		self.arcs = list()
 		self.auditFiles = list()
 
-	@statismethod
+	@staticmethod
 	def load(self, _id):
 		print('FYI')
 		pass
@@ -435,6 +435,23 @@ class Organization(BasicAPIObject):
 		self.nessusManagers = list()
 		self.pubSites = list()
 		self.ldaps = list()
+
+	def __repr__(self):
+		mystr = """
+id=%s, name=%s, description=%s, email=%s, address=%s, city=%s, 
+state=%s, country=%s, phone=%s, fax=%s, ipInfoLinks=%s, 
+zoneSelection=%s, restrictedIPs=%s, vulnScoreLow=%s
+vulnScoreMedium=%s, vulnScoreHigh=%s, vulnScoreCritical=%s
+createdTime=%s, modifiedTime=%s, userCount=%s, lces=%s, 
+repositories=%s, zones=%s, nessusManagers=%s, pubSites=%s, 
+ldaps=%s""" % (self.id, self.name, self.description, \
+self.email, self.address, self.city, self.state, self.country, \
+self.phone, self.fax, self.ipInfoLinks, self.zoneSelection, \
+self.restrictedIPs, self.vulnScoreLow, self.vulnScoreMedium, \
+self.vulnScoreHigh, self.vulnScoreCritical, self.createdTime, \
+self.modifiedTime, self.userCount, self.lces, self.repositories, \
+self.zones, self.nessusManagers, self.pubSites, self.ldaps)
+		return mystr
 
 	@staticmethod
 	def load(sc, org_id):
