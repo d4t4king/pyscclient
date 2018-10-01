@@ -10,18 +10,6 @@
 #######################################################################
 #	THIS SCRIPT USES TABS
 #######################################################################
-#	INDEX
-#######################################################################
-#	Connection Object: (line) 	47
-#	Asset:						439
-#	Organization:				367
-#	Scanner:					208
-#	Zone:						321
-#	Repository:					473
-#	PluginFamily:				530
-#	Plugin:						660
-#	Scan						662
-#######################################################################
 
 import json
 import time
@@ -60,11 +48,11 @@ class Connection(object):
 		rh = response.json()['response']
 		if verbose:
 			print("""
-jobd:					%s
-licenseStatus:				%s
-PluginSubscriptionStatus:		%s
-LCEPluginSubscriptionStatus:		%s
-PassivePluginSubscriptionStatus:	%s """ % (rh['jobd'], \
+	jobd:					%s
+	licenseStatus:				%s
+	PluginSubscriptionStatus:		%s
+	LCEPluginSubscriptionStatus:		%s
+	PassivePluginSubscriptionStatus:	%s """ % (rh['jobd'], \
 						rh['licenseStatus'], rh['PluginSubscriptionStatus'], \
 						rh['LCEPluginSubscriptionStatus'], \
 						rh['PassivePluginSubscriptionStatus']))
@@ -77,21 +65,21 @@ PassivePluginSubscriptionStatus:	%s """ % (rh['jobd'], \
 			for k in rh['feedUpdates']:
 				print("	{0}: {1}".format(k, rh['feedUpdates'][k]))
 			print("""
-activeIPs:				%s
-licensedIPs				%s """ % (rh['activeIPs'], rh['licensedIPs']))
+	activeIPs:				%s
+	licensedIPs				%s """ % (rh['activeIPs'], rh['licensedIPs']))
 		else:
 			print("""
-jobd:		%s
-licenseStatus:	%s
-activeIPs:	%s
-licensedIPs:	%s """ % (rh['jobd'], rh['licenseStatus'], \
+	jobd:		%s
+	licenseStatus:	%s
+	activeIPs:	%s
+	licensedIPs:	%s """ % (rh['jobd'], rh['licenseStatus'], \
 				rh['activeIPs'], rh['licensedIPs']))
 
 
 	def list_scanners(self):
 		"""
 			Iterable list of scanners.
-			This is where my lack f python experience comes in....
+			This is where my lack of python experience comes in....
 			maybe an array is just as iterable as this generator?
 		"""
 		pp = pprint.PrettyPrinter(indent=4)
@@ -206,6 +194,16 @@ licensedIPs:	%s """ % (rh['jobd'], rh['licenseStatus'], \
 		for pf in response.json()['response']:
 			pf_obj = PluginFamily.load(self.sc, pf['id'])
 			yield pf_obj
+
+	def list_users(self):
+		"""
+			Generator object that returns the list of users
+		"""
+		fields = ['id']
+		resp = self.sc.get('user', params={'fields':",".join(fields)})
+		for u in resp.json()['response']:
+			user = User.load(self.sc, u['id'])
+			yield user
 
 class BasicAPIObject(object):
 	def __init__(self):
@@ -628,6 +626,42 @@ class Repository(BasicAPIObject):
 class Role(BasicAPIObject):
 	def __init__(self):
 		super(BasicAPIObject, self).__init__()
+		self.creator = None
+		self.createdTime = 0
+		self.modifiedTime = 0
+		self.permManageApp = False
+		self.permManageGroups = False
+		self.permManageRoles = False
+		self.perlManageImages = False
+		self.permManageGroupRelationships = False
+		self.permManageBlackoutWindows = False
+		self.permManageAttributeSets = False
+		self.permCreateTickets = False
+		self.permCreateAlerts = False
+		self.permCreateAuditFiles = False
+		self.permCreateLDAPAssets = False
+		self.permCreatePolicies = False
+		self.permPurgeTickets = False
+		self.permPurgeScanResults = False
+		self.permPurgeReportResults = False
+		self.permScan = False
+		self.permAgentsScan = False
+		self.permShareObjects = False
+		self.permUpdateFeeds = False
+		self.permUploadNessusResults = False
+		self.permViewOrgLogs = False
+		self.permManageAcceptRiskRules = False
+		self.permManageRecastRiskRules = False
+		self.organizationCounts = None
+
+	@staticmethod
+	def load(sc, _id):
+		pp = pprint.PrettyPrinter(indent=4)
+		resp = sc.get('role', params={'id': _id})
+		rb = resp.json()['response']
+		role = Role()
+		role.__dict__.update(rb)
+		return role
 
 class Scan(BasicAPIObject):
 	def __init__(self):
@@ -667,6 +701,68 @@ class Scan(BasicAPIObject):
 		scan = Scan()
 		scan.__dict__.update(rb)
 		return scan
+
+class ScanPolicy(BasicAPIObject):
+	def __init__(self):
+		super(BasicAPIObject, self).__init__()
+		self.status = 0
+		self.policyTemplate = None
+		self.policyProfileName = ''
+		self.creator = ''
+		self.tags = list()
+		self.createdTime = 0
+		self.modifiedTime = 0
+		self.context = ''
+		self.generateXCCDFResults = False
+		self.auditFiles = list()
+		self.preferences = ''
+		self.targetGroup = ''
+		self.groups = list()
+		self.families = list()
+		self.usable = False
+		self.manageable = False
+
+	@staticmethod
+	def load(sc, _id):
+		pp = pprint.PrettyPrinter(indent=4)
+		resp = sc.get('policy', params={'id': _id})
+		rb = resp.json()['response']
+		sp = ScanPolicy()
+		sp.__dict__.update(rb)
+		return sp
+
+class ScanResults(BasicAPIObject):
+	def __init__(self):
+		super(BasicAPIObject, self).__init__()
+		self.status = 0
+		self.initiator = ''
+		self.owner = ''
+		self.ownerGroup = ''
+		self.repository = None
+		self.scan = None
+		self.job = ''
+		self.details = ''
+		self.importStatus = ''
+		self.importStart = 0
+		self.importFinish = 0
+		self.importDuration = 0
+		self.downloadAvailable = False
+		self.downloadFormat = ''
+		self.dataFormat = ''
+		self.resultType = ''
+		self.resultSource = ''
+		self.running = False
+		self.errorDetails = ''
+		self.importErrorDetails = ''
+		self.totalIPs = 0
+		self.scannedIPs = 0
+		self.startTime = 0
+		self.finishTime = 0
+		self.scanDuration = 0
+		self.completedIPs = 0
+		self.completedChecks = 0
+		self.totalChecks = 0
+		self.progress = None
 
 class Scanner(BasicAPIObject):
 	def __init__(self):
@@ -726,6 +822,60 @@ class Scanner(BasicAPIObject):
 		# save the Scanner object to the console
 		# this can be a new scanner object, or a modified, existing one
 		pass
+
+class User(object):
+	def __init__(self):
+		self.id = 0
+		self.username = ''
+		self.firstname = ''
+		self.lastname = ''
+		self.status = ''
+		self.role = None						# Role?
+		self.title = ''
+		self.email = ''
+		self.address = ''
+		self.city = ''
+		self.state = ''
+		self.country = ''
+		self.phone = ''
+		self.fax = ''
+		self.createdTime = ''
+		self.modifiedTime = ''
+		self.lastLogin = 0
+		self.lastLoginIP = ''
+		self.mustChangePassword = False
+		self.locked = False
+		self.failedLogins = 0
+		self.authType = ''
+		self.fingerprint = ''
+		self.password = ''
+		self.description = ''
+		self.canUse = False
+		self.canManage = False
+		self.managedUsersGroups = list()
+		self.managedObjectsGroups = list()
+		self.preferences = list()
+		self.ldaps = ''
+		self.ldapUsername = ''
+		self.responsibleAsset = None
+		self.orgID = 0
+
+	def __repr__(self):
+		my_str = """
+	id: %s, username: %s, firstname: %s, lastname: %s, status: %s, role: %s,
+	title: %s, email: %s, address: %s, city: %s, state: %s, country:
+		""" % (self.id, self.username, self.firstname, self.lastname, self.status, \
+		self.role, self.title, self.email, self.address, self.city, self.state, \
+		self.country)
+		return my_str
+
+	def load(sc, _id):
+		pp = pprint.PrettyPrinter(indent=4)
+		resp = sc.get('user', params={'id': _id})
+		rb = resp.json()['response']
+		user = User()
+		user.__dict__.update(rb)
+		return user
 
 class Utils(object):
 	def __init__(self):
