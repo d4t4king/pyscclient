@@ -17,12 +17,19 @@ def main():
 		#pp.pprint(user)
 		print("id: {0}, {1}, {2} ({3}) {4}".format(user.id, user.lastname, \
 			user.firstname, user.username, user.orgID))
+	### TBD:
+	### The intent is to loop through the list of orgs and list
+	### the users in each org.  I don't know if this is possible with
+	### the current implementation of the API.
+	###
+	### It should be possible.  I just need to figure out the right 
+	### way to call it.
 	#orgs = conn.organizations()
-	for org in conn.list_orgs():
-		cprint("ORG: {0}".format(org.id), "cyan", attrs=["bold"])
-		for user in conn.list_users(orgID=org.id):
-			print("id: {0}, {1}, {2} ({3}) {4}".format(user.id, user.lastname, \
-				user.firstname, user.username, user.orgID))
+	#for org in conn.list_orgs():
+	#	cprint("ORG: {0}".format(org.id), "cyan", attrs=["bold"])
+	#	for user in conn.list_users(orgID=org.id):
+	#		print("id: {0}, {1}, {2} ({3}) {4}".format(user.id, user.lastname, \
+	#			user.firstname, user.username, user.orgID))
 
 if __name__ == '__main__':
 	main()
