@@ -114,17 +114,30 @@ class Connection(object):
 			zn = Zone.load(self.sc, _id['id'])
 			yield zn
 
-	def list_orgs(self):
+	def list_orgs(self, **kwargs):
 		"""
 			Iterable list of Organizations.
 		"""
 		pp = pprint.PrettyPrinter(indent=4)
 		fields = ['id']
 		response = self.sc.get('organization', params={"fields": ",".join(fields)})
-		#pp.pprint(response.json())
+		pp.pprint(response.json())
 		for org in response.json()['response']:
 			org_obj = Organization.load(self.sc, org['id'])
 			yield org_obj
+
+	def organizations(self):
+		"""
+			Returns the array of organizations.
+		"""
+		pp = pprint.PrettyPrinter(indent=4)
+		fields = ['id']
+		resp = self.sc.get('organization', params={"fields": ",".join(fields)})
+		orgs = list()
+		for org in resp.json()['response']:
+			org_obj = Organization.load(self.sc, org['id'])
+			orgs.append(org_obj)
+		return orgs
 
 	def list_repositories(self):
 		"""
@@ -195,12 +208,22 @@ class Connection(object):
 			pf_obj = PluginFamily.load(self.sc, pf['id'])
 			yield pf_obj
 
-	def list_users(self):
+	def list_users(self, **kwargs):
 		"""
 			Generator object that returns the list of users
 		"""
 		fields = ['id']
-		resp = self.sc.get('user', params={'fields':",".join(fields)})
+		resp = None
+		if kwargs:
+			print("DEBUG: **kwargs is not None. ({0})".format(kwargs))
+			if 'orgID' in kwargs:
+				print("DEBUG: Found orgID key in **kwargs.")
+				resp = self.sc.get('user', params={"fields":",".join(fields), "orgID": kwargs['orgID']})
+			else:
+				resp = self.sc.get('user', params={'fields':",".join(fields)})
+		else:
+			resp = self.sc.get('user', params={'fields':",".join(fields)})
+		print(resp.url)
 		for u in resp.json()['response']:
 			user = User.load(self.sc, u['id'])
 			yield user
@@ -665,7 +688,7 @@ class Role(BasicAPIObject):
 
 class Scan(BasicAPIObject):
 	def __init__(self):
-		super(BasicAPIObject, self).__init__()'
+		super(BasicAPIObject, self).__init__()
 		self.status = ''
 		self.ipList = list()
 		self.type = ''
@@ -860,15 +883,16 @@ class User(object):
 		self.responsibleAsset = None
 		self.orgID = 0
 
-	def __repr__(self):
-		my_str = """
-	id: %s, username: %s, firstname: %s, lastname: %s, status: %s, role: %s,
-	title: %s, email: %s, address: %s, city: %s, state: %s, country:
-		""" % (self.id, self.username, self.firstname, self.lastname, self.status, \
-		self.role, self.title, self.email, self.address, self.city, self.state, \
-		self.country)
-		return my_str
+	#def __repr__(self):
+	#	my_str = """
+	#id: %s, username: %s, firstname: %s, lastname: %s, status: %s, role: %s,
+	#title: %s, email: %s, address: %s, city: %s, state: %s, country:
+	#	""" % (self.id, self.username, self.firstname, self.lastname, self.status, \
+	#	self.role, self.title, self.email, self.address, self.city, self.state, \
+	#	self.country)
+	#	return my_str
 
+	@staticmethod
 	def load(sc, _id):
 		pp = pprint.PrettyPrinter(indent=4)
 		resp = sc.get('user', params={'id': _id})
