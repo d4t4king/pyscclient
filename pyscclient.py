@@ -228,6 +228,20 @@ class Connection(object):
 			user = User.load(self.sc, u['id'])
 			yield user
 
+	def list_manageable_assets(self):
+		"""
+			Generator object that returns the list of manageable assets
+
+			Note:  The API differentiates between "manageable" assets and
+			"usable" assets.  I don't quite know what the distinction is, so
+			the intent here is to create methods for both and all.
+		"""
+		fields = ['id']
+		resp = self.sc.get('asset', params={"fields":",".join(fields)})
+		for ass in resp.json()['response']['manageable']:
+			asset = Asset.load(self.sc, ass['id'])
+			yield asset
+
 class BasicAPIObject(object):
 	def __init__(self):
 		self.id = 0
