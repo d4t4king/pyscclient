@@ -11,7 +11,7 @@ def main():
 	with open(cark, 'r') as f:
 		cark_conf = json.load(f)
 		passwd = pyscclient.Utils.get_cark_creds(cark_conf)
-	pp.pprint(cark_conf)
+	#pp.pprint(cark_conf)
 	conn = pyscclient.Connection(cark_conf['schost'], cark_conf['username'], passwd)
 	for org in conn.list_orgs():
 		pp.pprint(org)
