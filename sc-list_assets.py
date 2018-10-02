@@ -14,7 +14,9 @@ def main():
 	#pp.pprint(cark_conf)
 	conn = pyscclient.Connection(cark_conf['schost'], cark_conf['username'], passwd)
 	for ass in conn.list_assets():
-		pp.pprint(ass)
+		#pp.pprint(ass)
+		# Asset is really asset group
+		print("%s, %s, %s" % (ass.id, ass.name, ass.ipCount))
 
 if __name__ == '__main__':
 	main()
