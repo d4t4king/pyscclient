@@ -13,7 +13,7 @@ def main():
 		passwd = pyscclient.Utils.get_cark_creds(cark_conf)
 	#pp.pprint(cark_conf)
 	conn = pyscclient.Connection(cark_conf['schost'], cark_conf['username'], passwd)
-	for ass in conn.list_manageable_assets():
+	for ass in conn.list_usable_assets():
 		pp.pprint(ass)
 
 if __name__ == '__main__':
