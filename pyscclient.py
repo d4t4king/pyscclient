@@ -637,6 +637,13 @@ class Query(BasicAPIObject):
 		print('NYI')
 		pass
 
+class ReportTypes(object):
+	def __init__(self, name, type, enabled, attributeSets=list()):
+		self.name = name
+		self.type = type
+		self.enabled = enabled
+		self.sttributeSets = attributeSets
+
 class Repository(BasicAPIObject):
 	# represents a Repository in object form
 	TYPE_ALL = 'All'
@@ -891,6 +898,91 @@ class Scanner(BasicAPIObject):
 		# save the Scanner object to the console
 		# this can be a new scanner object, or a modified, existing one
 		pass
+
+class System(object):
+
+	class Disagnostics(object):
+		def __init__(self, sc):
+			resp = sc.get('diagnostics')
+			rb = resp.json()['response']
+			diag = Diagnostics()
+			diag.__dict__.update(rb)
+
+		@staticmethod
+		def generate(sc):
+			opts = dict()
+			params = dict()
+			opts['options'] = "all"
+			params['task'] = 'disgnosticsFile'
+			resp = sc.post('diagnostics', params)
+			return int(resp.json()['error_code'])
+
+	def __init__(self):
+		self.reportTypes = list()
+		self.version = 0.0
+		self.buildID = ''
+		self.banner = ''
+		self.releaseID = ''
+		self.uuid = ''
+		self.logo = ''
+		self.serverAuth = ''
+		self.serverClassification = ''
+		self.sessionTimeout = 0
+		self.licenseStatus = ''
+		self.mode = ''
+		self.ACAS = False
+		self.freshInstall = False
+		self.headerText = ''
+		self.PasswordComplexity = False
+		self.timezones = list()
+		self.scLogs = dict()
+		self.diagnostics = Diagnostics()
+
+	@staticmethod
+	def load(sc):
+		"""
+			Loads the system details
+		"""
+		system = System()
+		resp = sc.get('system')
+		rb = resp.json()['response']
+		tzs = list()
+		rts = list()
+		for tz in rb['timezones']:
+			tzobj = Timezone(tz['name'], tz['gmtOffset'])
+			tzs.append(tzobj)
+		system.timezones = tzs
+		for rt in rb['reportTypes']:
+			rtobj = ReportType(rt['name'], rt['type'],rt['enabled'],rt['attributeSets'])
+			rts.append(rtobj)
+		system.reportTypes = rts
+		system.version = rb['version']
+		system.buildID = rb['buildID']
+		system.banner = rb['banner']
+		system.releaseID = rb['releaseID']
+		system.uuid = rb['uuid']
+		system.logo = rb['logo']
+		system.serverAuth = rb['serverAuth']
+		system.serverClassification = rb['serverClassification']
+		system.sessionTimeout = int(rb['sessionTimeout'])
+		system.licenseStatus = rb['licenseStatus']
+		system.mode = rb['mode']
+		system.ACAS = rb['ACAS']
+		if rb['freshInstall'] == 'no':
+			system.freshInstall = False
+		elif rb['freshInstall'] == 'yes':
+			system.freshInstall = True
+		else:
+			raise("Unknown fresh install state: {0}.  Expected 'yes' or 'no'.".format(rb['freshInstall']))
+		system.headerText = rb['headerText']
+		system.PasswordComplexity = rb['PasswordComplexity']
+		system.scLogs = rb['scLogs']
+		return system
+
+class TimeZone(object):
+	def __init__(self, name, offset):
+		self.name = name
+		self.gmtOffset = float(offset)
 
 class User(object):
 	def __init__(self):
