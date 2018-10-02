@@ -438,6 +438,21 @@ class Group(BasicAPIObject):
 		print('FYI')
 		pass
 
+class Disagnostics(object):
+	def __init__(self, sc):
+		resp = sc.get('diagnostics')
+		rb = resp.json()['response']
+		self.__dict__.update(rb)
+
+	@staticmethod
+	def generate(sc):
+		opts = dict()
+		params = dict()
+		opts['options'] = "all"
+		params['task'] = 'disgnosticsFile'
+		resp = sc.post('diagnostics', params)
+		return int(resp.json()['error_code'])
+
 class IPInfo(object):
 	def __init__(self, _ip):
 		self.ip = _ip
@@ -901,22 +916,6 @@ class Scanner(BasicAPIObject):
 
 class System(object):
 
-	class Disagnostics(object):
-		def __init__(self, sc):
-			resp = sc.get('diagnostics')
-			rb = resp.json()['response']
-			diag = Diagnostics()
-			diag.__dict__.update(rb)
-
-		@staticmethod
-		def generate(sc):
-			opts = dict()
-			params = dict()
-			opts['options'] = "all"
-			params['task'] = 'disgnosticsFile'
-			resp = sc.post('diagnostics', params)
-			return int(resp.json()['error_code'])
-
 	def __init__(self):
 		self.reportTypes = list()
 		self.version = 0.0
@@ -936,7 +935,6 @@ class System(object):
 		self.PasswordComplexity = False
 		self.timezones = list()
 		self.scLogs = dict()
-		self.diagnostics = Diagnostics()
 
 	@staticmethod
 	def load(sc):
