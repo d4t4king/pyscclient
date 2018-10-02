@@ -242,6 +242,16 @@ class Connection(object):
 			asset = Asset.load(self.sc, ass['id'])
 			yield asset
 
+	def list_usable_assets(self):
+		"""
+			Generator object that returns the list of usable objects.
+		"""
+		fields = ['id']
+		resp = self.sc.get('asset', params={"fields":",".join(fields)})
+		for ass in resp.json()['response']['usable']:
+			asset = Asset.load(self.sc, ass['id'])
+			yield asset
+
 class BasicAPIObject(object):
 	def __init__(self):
 		self.id = 0
