@@ -75,7 +75,10 @@ class Connection(object):
 	licensedIPs:	%s """ % (rh['jobd'], rh['licenseStatus'], \
 				rh['activeIPs'], rh['licensedIPs']))
 
-
+	def getSystem(self):
+		sys = System.load(self.sc)
+		return sys
+		
 	def list_scanners(self):
 		"""
 			Iterable list of scanners.
