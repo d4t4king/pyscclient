@@ -244,13 +244,32 @@ class Connection(object):
 
 	def list_usable_assets(self):
 		"""
-			Generator object that returns the list of usable objects.
+			Generator object that returns the list of usable assets.
 		"""
 		fields = ['id']
 		resp = self.sc.get('asset', params={"fields":",".join(fields)})
 		for ass in resp.json()['response']['usable']:
 			asset = Asset.load(self.sc, ass['id'])
 			yield asset
+
+	def list_assets(self):
+		"""
+			Generator object that returns the list of all assets.
+		"""
+		pp = pprint.PrettyPrinter(indent=4)
+		fields = ['id']
+		resp = self.sc.get('asset', params={"fields":",".join(fields)})
+		#pp.pprint(resp.json()['response']['manageable'])
+		assets = list()
+		for ass in resp.json()['response']['usable']:
+			asset = Asset.load(self.sc, ass['id'])
+			assets.append(asset)
+		for ass in resp.json()['response']['manageable']:
+			asset = Asset.load(self.sc, ass['id'])
+			if asset not in assets:
+				assets.append(asset)
+		for a in assets:
+			yield a
 
 class BasicAPIObject(object):
 	def __init__(self):
@@ -315,10 +334,13 @@ class Asset(BasicAPIObject):
 		# usable, managable, excludeAllDefined, excludeWatchlists
 
 	@staticmethod
-	def load(sc, id):
+	def load(sc, _id):
+		pp = pprint.PrettyPrinter(indent=4)
 		# load the Asset from the console in object form
-		resp = sc.get('asset', params={'id':['id']})
+		resp = sc.get('asset', params={'id':_id})
+		#print("URL: {0}".format(resp.url))
 		rb = resp.json()['response']
+		#pp.pprint(rb)
 		asset = Asset()
 		asset.__dict__.update(rb)
 		return asset
