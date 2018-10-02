@@ -949,13 +949,13 @@ class System(object):
 		rb = resp.json()['response']
 		tzs = list()
 		rts = list()
-		for tz in rb['timezones']:
-			tzobj = Timezone(tz['name'], tz['gmtOffset'])
-			tzs.append(tzobj)
-		system.timezones = tzs
-		for rt in rb['reportTypes']:
-			rtobj = ReportType(rt['name'], rt['type'],rt['enabled'],rt['attributeSets'])
-			rts.append(rtobj)
+		#for tz in rb['timezones']:
+		#	tzobj = Timezone(tz['name'], tz['gmtOffset'])
+		#	tzs.append(tzobj)
+		#system.timezones = tzs
+		#for rt in rb['reportTypes']:
+		#	rtobj = ReportType(rt['name'], rt['type'],rt['enabled'],rt['attributeSets'])
+		#	rts.append(rtobj)
 		system.reportTypes = rts
 		system.version = rb['version']
 		system.buildID = rb['buildID']
@@ -967,7 +967,8 @@ class System(object):
 		system.serverClassification = rb['serverClassification']
 		system.sessionTimeout = int(rb['sessionTimeout'])
 		system.licenseStatus = rb['licenseStatus']
-		system.mode = rb['mode']
+		if 'mode' in rb:
+			system.mode = rb['mode']
 		system.ACAS = rb['ACAS']
 		if rb['freshInstall'] == 'no':
 			system.freshInstall = False
