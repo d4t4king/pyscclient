@@ -7,7 +7,7 @@ from termcolor import cprint
 
 def main():
 	pp = pprint.PrettyPrinter(indent=4)
-	cark = 'cark_conf.json'
+	cark = 'admin_cark_conf.json'
 	with open(cark, 'r') as f:
 		cark_conf = json.load(f)
 		passwd = pyscclient.Utils.get_cark_creds(cark_conf)
@@ -30,10 +30,15 @@ def main():
 	FreshInstall: %s
 	HeaderText: %s
 	PasswordComplexity: %s
+	TimeZone Count: %s
+	ReportTypes: %s
 	""" % (sys.version, sys.buildID, sys.banner, sys.releaseID, \
 		sys.uuid, sys.logo, sys.serverAuth, sys.serverClassification, \
 		sys.sessionTimeout, sys.licenseStatus, sys.mode, sys.ACAS, \
-		sys.freshInstall, sys.headerText, sys.PasswordComplexity))
+		sys.freshInstall, sys.headerText, sys.PasswordComplexity, \
+		len(sys.timezones), sys.reportTypes))
+
+	pp.pprint(sys.diagnostics)
 
 if __name__== '__main__':
 	main()
