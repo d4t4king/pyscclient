@@ -2,6 +2,7 @@
 
 import json
 import pprint
+import netaddr
 import argparse
 import pyscclient
 
