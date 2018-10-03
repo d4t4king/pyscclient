@@ -32,6 +32,22 @@ class APIError(Exception):
 	def __str__(self):
 		return repr('[%s]: %s' % (self.code, self.message))
 
+class ReportType(object):
+	def __init__(self, name, type, enabled, attributeSets=list()):
+		self.name = name
+		self.type = type
+		self.enabled = enabled
+		self.sttributeSets = attributeSets
+
+	def __repr__(self):
+		mystr = "({0}, {1}, {2})".format(self.name, self.type, self.enabled)
+		return mystr
+
+class Timezone(object):
+	def __init__(self, name, offset):
+		self.name = name
+		self.gmtOffset = float(offset)
+
 class Connection(object):
 	def __init__(self, host, user, passwd):
 		self.host = host
@@ -418,6 +434,35 @@ class CurrentUser(BasicAPIObject):
 		print('NYI')
 		pass
 
+class Diagnostics(object):
+	def __init__(self, sc):
+		resp = sc.get('system/diagnostics')
+		rb = resp.json()['response']
+		self.__dict__.update(rb)
+
+	def __repr__(self):
+		mystr = """
+	Java Status:				%s
+	RPM Status:					%s
+	Disk Status:				%s
+	Disk Threashold Status:		%s
+	Last Checked:				%s
+	Last generated:				%s
+	Generated State:			%s
+	""" % (self.statusJava, self.statusRPM, self.statusDisk, \
+			self.statusThresholdDisk, self.statusLastChecked, \
+			self.diagnosticsGenerated, self.diagnosticsGenerateState)
+		return mystr
+
+	@staticmethod
+	def generate(sc):
+		opts = dict()
+		params = dict()
+		opts['options'] = "all"
+		params['task'] = 'disgnosticsFile'
+		resp = sc.post('system/diagnostics/generate', params)
+		return int(resp.json()['error_code'])
+
 class Group(BasicAPIObject):
 	def __init__(self, _id):
 		super(BasicAPIObject, self).__init__()
@@ -440,21 +485,6 @@ class Group(BasicAPIObject):
 	def load(self, _id):
 		print('FYI')
 		pass
-
-class Disagnostics(object):
-	def __init__(self, sc):
-		resp = sc.get('diagnostics')
-		rb = resp.json()['response']
-		self.__dict__.update(rb)
-
-	@staticmethod
-	def generate(sc):
-		opts = dict()
-		params = dict()
-		opts['options'] = "all"
-		params['task'] = 'disgnosticsFile'
-		resp = sc.post('diagnostics', params)
-		return int(resp.json()['error_code'])
 
 class IPInfo(object):
 	def __init__(self, _ip):
@@ -654,13 +684,6 @@ class Query(BasicAPIObject):
 	def load(self, _id):
 		print('NYI')
 		pass
-
-class ReportTypes(object):
-	def __init__(self, name, type, enabled, attributeSets=list()):
-		self.name = name
-		self.type = type
-		self.enabled = enabled
-		self.sttributeSets = attributeSets
 
 class Repository(BasicAPIObject):
 	# represents a Repository in object form
@@ -938,6 +961,7 @@ class System(object):
 		self.PasswordComplexity = False
 		self.timezones = list()
 		self.scLogs = dict()
+		self.diagnostic = None
 
 	@staticmethod
 	def load(sc):
@@ -949,13 +973,13 @@ class System(object):
 		rb = resp.json()['response']
 		tzs = list()
 		rts = list()
-		#for tz in rb['timezones']:
-		#	tzobj = Timezone(tz['name'], tz['gmtOffset'])
-		#	tzs.append(tzobj)
-		#system.timezones = tzs
-		#for rt in rb['reportTypes']:
-		#	rtobj = ReportType(rt['name'], rt['type'],rt['enabled'],rt['attributeSets'])
-		#	rts.append(rtobj)
+		for tz in rb['timezones']:
+			tzobj = Timezone(tz['name'], tz['gmtOffset'])
+			tzs.append(tzobj)
+		system.timezones = tzs
+		for rt in rb['reportTypes']:
+			rtobj = ReportType(rt['name'], rt['type'],rt['enabled'],rt['attributeSets'])
+			rts.append(rtobj)
 		system.reportTypes = rts
 		system.version = rb['version']
 		system.buildID = rb['buildID']
@@ -977,14 +1001,13 @@ class System(object):
 		else:
 			raise("Unknown fresh install state: {0}.  Expected 'yes' or 'no'.".format(rb['freshInstall']))
 		system.headerText = rb['headerText']
-		system.PasswordComplexity = rb['PasswordComplexity']
+		if 'PasswordComplexity' in rb:
+			system.PasswordComplexity = rb['PasswordComplexity']
+		else: 
+			system.PasswordComplexity = False
+		system.diagnostics = Diagnostics(sc)
 		system.scLogs = rb['scLogs']
 		return system
-
-class TimeZone(object):
-	def __init__(self, name, offset):
-		self.name = name
-		self.gmtOffset = float(offset)
 
 class User(object):
 	def __init__(self):
