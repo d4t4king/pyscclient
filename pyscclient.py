@@ -94,7 +94,7 @@ class Connection(object):
 	def getSystem(self):
 		sys = System.load(self.sc)
 		return sys
-		
+
 	def list_scanners(self):
 		"""
 			Iterable list of scanners.
@@ -483,7 +483,7 @@ class Group(BasicAPIObject):
 
 	@staticmethod
 	def load(self, _id):
-		print('FYI')
+		print('NYI')
 		pass
 
 class IPInfo(object):
@@ -1003,7 +1003,7 @@ class System(object):
 		system.headerText = rb['headerText']
 		if 'PasswordComplexity' in rb:
 			system.PasswordComplexity = rb['PasswordComplexity']
-		else: 
+		else:
 			system.PasswordComplexity = False
 		system.diagnostics = Diagnostics(sc)
 		system.scLogs = rb['scLogs']
