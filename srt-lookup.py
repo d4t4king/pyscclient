@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import re
 import json
 import pprint
 import netaddr
@@ -27,7 +28,12 @@ def main():
 	print("Checking {0} organization(s) on this SC console.".format(len(conn.organizations())))
 	# loop through the list of organizations and check the restrictedIPs
 	for org in conn.list_orgs():
-		pp.pprint(org.restrictedIPs)
+		#pp.pprint(org.restrictedIPs)
+        # if the restrictedIPs looks like an array, loop through it
+        if 'list' in str(type(org.restrictedIPs)):
+            print("restrictedIPs is a list()")
+        else:
+            print("restrictedIPs in a {0}".format(org.restrictedIPs))
 	# list any active scans
 	# check the ipList to see if the ip in question is a member
 	pass
