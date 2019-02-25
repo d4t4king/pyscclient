@@ -29,13 +29,29 @@ def main():
 	# loop through the list of organizations and check the restrictedIPs
 	for org in conn.list_orgs():
 		#pp.pprint(org.restrictedIPs)
-        # if the restrictedIPs looks like an array, loop through it
-        if 'list' in str(type(org.restrictedIPs)):
-            print("restrictedIPs is a list()")
-        else:
-            print("restrictedIPs in a {0}".format(org.restrictedIPs))
-	# list any active scans
-	# check the ipList to see if the ip in question is a member
+		# if the restrictedIPs looks like an array, loop through it
+		if 'list' in str(type(org.restrictedIPs)):
+			print("restrictedIPs is a list()")
+		else:
+			print("restrictedIPs is a {0}".format(type(org.restrictedIPs)))
+			#pp.pprint(org.restrictedIPs)
+			if "," in org.restrictedIPs:
+				iplist = org.restrictedIPs.split(",")
+				#pp.pprint(iplist)
+				is_global_exclude = False
+				for cidr in iplist:
+					match = re.search(r'[0-9.]+\/\d+', cidr)
+					if match:
+						# ip looks like a CIDR block
+						if netaddr.IPAddress(args.ipaddr) in netaddr.IPNetwork(cidr):
+							print("{0} is in {1}".format(args.ipaddr, cidr))
+							is_global_exclude = True
+		if is_global_exclude:
+			print("IP is globally excluded within the Organization and will not be scanned.")
+			exit(0)
+		else:
+		# list any active scans
+		# check the ipList to see if the ip in question is a member
 	pass
 
 if __name__=='__main__':
