@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import pprint
-import pyscclient
 from termcolor import cprint,colored
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import pyscclient
 
 def main():
 	pp = pprint.PrettyPrinter(indent=4)

@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
+import os
 import csv
+import sys
 import pprint
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import pyscclient
 
 def main():
