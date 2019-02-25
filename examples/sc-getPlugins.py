@@ -4,13 +4,16 @@ import csv
 import json
 import time
 import pprint
-import pyscclient
 import subprocess
 from termcolor import cprint,colored
 
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+import pyscclient
+
 def main():
 	pp = pprint.PrettyPrinter(indent=4)
-	cark = 'cark_conf.json'
+	cark = '../cark_conf.json'
 	with open(cark, 'r') as f:
 		cark_conf = json.load(f)
 		passwd = pyscclient.Utils.get_cark_creds(cark_conf)
