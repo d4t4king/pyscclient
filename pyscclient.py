@@ -71,6 +71,7 @@ class Connection(object):
 		list_plugin_families (yield, list): returns an iterable list 
 			of all plugin families
 		list_scans (yield, list): returns an iterable list of all scans
+		list_assets (yield, list): returns an iterable list of all assets
 	"""
 
 	def __init__(self, host, user, passwd):
@@ -296,6 +297,21 @@ licensedIPs:	%s """ % (rh['jobd'], rh['licenseStatus'], \
 		for s in self.list_scans():
 			if scanname in s.name:
 				return s
+
+	def list_assets(self):
+		""" Gets the list of assets
+
+		Returns:
+			generator: returns an iterable list of assets
+		"""
+
+		pp = pprint.PrettyPrinter(indent=4)
+		assets = list()
+		fields = ['id']
+		response = self.sc.get('asset', params={'fields': ",".join(fields)})
+		for ma in response.json()['response']['usable']:
+			ass = Asset.load(self.sc, ma['id'])
+			yield ass
 
 
 class Scanner(object):
@@ -565,7 +581,8 @@ class Asset(object):
 		a.owner = r.json()['response']['owner']
 		a.ownerGroup = r.json()['response']['ownerGroup']
 		a.targetGroup = r.json()['response']['targetGroup']
-		a.groups = r.json()['response']['groups']
+		if 'groups' in r.json()['response'].keys():
+			a.groups = r.json()['response']['groups']
 		a.template = r.json()['response']['template']
 		a.typeFields = r.json()['response']['typeFields']
 		a.type = r.json()['response']['type']
