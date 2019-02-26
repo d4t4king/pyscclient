@@ -10,7 +10,7 @@ import pyscclient
 
 def main():
 	pp = pprint.PrettyPrinter(indent=4)
-	cark = 'cark_conf.json'
+	cark = '../cark_conf.json'
 	with open(cark, 'r') as f:
 		cark_conf = json.load(f)
 		passwd = pyscclient.Utils.get_cark_creds(cark_conf)

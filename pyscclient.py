@@ -282,6 +282,21 @@ licensedIPs:	%s """ % (rh['jobd'], rh['licenseStatus'], \
 			scan = Scan.load(self.sc, s['id'])
 			yield scan
 
+	def get_scan(self, scanname):
+		""" Gets the scan with name __scanname__
+
+		Parameters:
+			scanname (str): name of the scan to retrieve
+		Returns:
+			pyscclient.Scan: returns the scan object with the supplied
+				name
+		"""
+
+		pp = pprint.PrettyPrinter(indent=4)
+		for s in self.list_scans():
+			if scanname in s.name:
+				return s
+
 
 class Scanner(object):
 	def __init__(self, _id, _name, descr, **args):
