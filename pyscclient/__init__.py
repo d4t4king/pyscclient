@@ -189,9 +189,9 @@ licensedIPs:	%s """ % (rh['jobd'], rh['licenseStatus'], \
 		pp = pprint.PrettyPrinter(indent=4)
 		fields = ['id']
 		response = self.sc.get('organization', params={"fields": ",".join(fields)})
-		pp.pprint(response.json())
+		#pp.pprint(response.json())
 		for org in response.json()['response']:
-			org_obj = Organization.load(self.sc, org['id'])
+			org_obj = Organization.load(self.sc, org['id'].decode('utf-8'))
 			yield org_obj
 
 	def list_repositories(self):
@@ -500,8 +500,29 @@ class Organization(object):
 		self.pubSites = []
 		self.ldaps = []
 
+	def to_json(self):
+		# need to replace the lists of objects with JSON
+		jrepos = list()
+		for r in self.repositories:
+			jrepos.append(r.__dict__)
+		self.repositories = jrepos
+		return json.dumps(self.__dict__)
+
+	@staticmethod
+	def update(sc, org_id, **kwargs):
+		pp = pprint.PrettyPrinter(indent=4)
+		#pp.pprint(kwargs)
+		#print("============")
+		#pp.pprint(json.dumps(kwargs))
+		#for k,v in kwargs.items():
+		#	print("k'{0}' is type {1}".format(k, type(v)))
+		resp = sc.sc.patch('organization/{0}'.format(org_id), \
+			params=kwargs)
+		return resp.json()['error_code']
+
 	@staticmethod
 	def load(sc, org_id):
+		#print("DEBUG: In Organization.load()")
 		# loads the Organization object with the specified ID from the console
 		resp = sc.get('organization', params={'id': org_id})
 		org = Organization(org_id, resp.json()['response']['name'], \
@@ -540,7 +561,7 @@ class Organization(object):
 		for ele in resp.json()['response']['zones']:
 			z = Zone.load(sc, ele['id'])
 			org.zones.append(z)
-		return self
+		return org
 
 class Asset(object):
 	# represents an Asset in object form
@@ -625,6 +646,10 @@ class Repository(object):
 		self.typeFields = ''
 		self.remoteSchedule = ''
 		self.organizations = []
+		self.groupAssign = None
+
+	def to_json(self):
+		return json.dumps(self.__dict__)
 
 	@staticmethod
 	def load(sc, repo_id):
@@ -654,6 +679,10 @@ class Repository(object):
 		#for o in response.json()['response']['organizations']:
 		#	org = Organization.load(sc, o['id'])
 		#	repo.organizations.append(o)
+		if 'groupAssign' in response.json()['response']:
+			repo.groupAssign = response.json()['response']['groupAssign']
+		else:
+			repo.groupAssign = ''
 		return repo
 
 class PluginFamily(object):
