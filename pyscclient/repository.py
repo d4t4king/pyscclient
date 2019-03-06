@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 
+import pprint
 
 class Repository(object):
 	# represents a Repository in object form

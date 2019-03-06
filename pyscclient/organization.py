@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from .repository import Repository
+
 class Organization(object):
 	# represents the Organization in SC
 	def __init__(self, _id, _name, descr):
