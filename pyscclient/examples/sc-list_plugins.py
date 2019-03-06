@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import pprint
 from termcolor import cprint,colored
 import os, sys
@@ -8,7 +9,12 @@ import pyscclient
 
 def main():
 	pp = pprint.PrettyPrinter(indent=4)
-	conn = pyscclient.Connection("nessussc.sempra.com", "sv-apiuser", "##Sempra01")
+	cark = '../cark_conf.json'
+	with open(cark, 'r') as f:
+		cark_conf = json.load(f)
+		passwd = pyscclient.Utils.get_cark_creds(cark_conf)
+	conn = pyscclient.Connection(cark_conf['schost'], \
+		cark_conf['username'], passwd)
 	for p in conn.plugins():
 		#pp.pprint(p)
 		print """
