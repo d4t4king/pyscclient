@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import pprint
+
 class PluginFamily(object):
 	def __init__(self, _id, _name):
 		self.id = _id

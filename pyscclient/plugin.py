@@ -1,4 +1,7 @@
 
+import pprint
+
+from .pluginfamily import PluginFamily
 
 class Plugin(object):
 	def __init__(self, _id, _name=None):

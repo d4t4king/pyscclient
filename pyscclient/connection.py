@@ -8,12 +8,14 @@ import subprocess
 from termcolor import colored, cprint
 from securitycenter import SecurityCenter5
 
-from .scan import Scan
-from .scanzone import Zone
 from .asset import Asset
-from .scanner import Scanner
-from .repository import Repository
 from .organization import Organization
+from .plugin import Plugin
+from .pluginfamily import PluginFamily
+from .repository import Repository
+from .scan import Scan
+from .scanner import Scanner
+from .scanzone import Zone
 
 class Connection(object):
 	"""A class to handle the basic connection to the SecurityCenter
