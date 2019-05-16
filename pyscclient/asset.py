@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import pprint
+
 class Asset(object):
 	# represents an Asset in object form
 	def __init__(self, _name, descr, _status):
