@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import pprint
+import json
 
 class Asset(object):
 	# represents an Asset in object form
@@ -32,6 +33,12 @@ class Asset(object):
 	def load(sc, _id):
 		# load the Asset from the console in object form
 		pp = pprint.PrettyPrinter(indent=4)
+		#fields = ['id', 'name', 'description', 'status', 'creator', \
+		#	'owner', 'ownerGroup', 'targetGroup', 'groups', 'template', \
+		#	'typeFields', 'viewableIPs', 'type', 'tags', 'context', \
+		#	'createdTime', 'modifiedTime', 'repositories', 'ipCount']
+		#pp.pprint(fields)
+		#r = sc.get('asset', params={"id":_id, "fields":fields})
 		r = sc.get('asset', params={"id":_id})
 		#pp.pprint(r.json()['response'])
 		a = Asset(r.json()['response']['name'], \
